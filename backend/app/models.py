@@ -64,3 +64,25 @@ class ConsultaLog(models.Model):
     resposta = models.TextField()
     contexto = models.TextField()
     criado_em = models.DateTimeField(auto_now_add=True)
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class UserProfile(models.Model):
+    TIPO_CHOICES = [
+        ("admin", "Administrador"),
+        ("analista", "Analista"),
+        ("editor", "Editor"),
+    ]
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default="analista")
+    bio = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} ({self.tipo})"
+
+@receiver(post_save, sender=User)
+def criar_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(usuario=instance)
