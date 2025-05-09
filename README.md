@@ -1,4 +1,3 @@
-
 # Projeto Django + Next.js com Docker
 
 ## Como rodar o projeto (desenvolvimento)
@@ -47,3 +46,4 @@ Acesso pelo navegador: http://localhost
 - Django roda com `DEBUG=True` em desenvolvimento e `DEBUG=False` na produção.
 - O banco de dados SQLite está persistente em `db_data`.
 - O Next.js já está configurado para consumir a API do Django usando a variável `NEXT_PUBLIC_BACKEND_URL`.
+=======
