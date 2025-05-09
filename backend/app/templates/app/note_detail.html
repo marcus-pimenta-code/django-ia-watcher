@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ note.title }} - Minhas Notas - Observatório de IA{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'documentos:note_list' %}">Minhas Notas</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ note.title|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0">{{ note.title }}</h1>
+            <div class="btn-group btn-group-sm">
+                <a href="{% url 'documentos:note_update' note.id %}" class="btn btn-outline-secondary">Editar</a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteNoteModal{{ note.id }}">
+                    Excluir
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small">Criada por {{ note.user.username }} em {{ note.created_at|date:"d/m/Y H:i" }}</p>
+            
+            {% if note.tags.all %}
+            <p><strong>Tags:</strong> 
+                {% for tag in note.tags.all %}
+                <span class="badge bg-secondary">{{ tag.name }}</span>
+                {% endfor %}
+            </p>
+            {% endif %}
+
+            <hr>
+
+            <h5 class="mt-4">Conteúdo da Nota</h5>
+            <div class="note-content bg-light p-3 rounded">
+                {{ note.content|linebreaks }}
+            </div>
+
+            {% if note.documents.all %}
+            <hr>
+            <h5 class="mt-4">Documentos Associados</h5>
+            <ul>
+                {% for doc in note.documents.all %}
+                <li><a href="{% url 'documentos:document_detail' doc.id %}">{{ doc.title }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de confirmação de exclusão (repetido de note_list, pode ser refatorado) -->
+    <div class="modal fade" id="deleteNoteModal{{ note.id }}" tabindex="-1" aria-labelledby="deleteNoteModalLabel{{ note.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteNoteModalLabel{{ note.id }}">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza que deseja excluir a nota "{{ note.title }}"? Esta ação não pode ser desfeita.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form method="post" action="{% url 'documentos:note_delete' note.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

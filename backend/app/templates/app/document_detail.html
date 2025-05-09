@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ document.title }} - Observatório de IA{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'documentos:document_list' %}">Documentos</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ document.title|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h1 class="h4 mb-0">{{ document.title }}</h1>
+                </div>
+                <div class="card-body">
+                    <p><strong>Fonte:</strong> {{ document.source }}</p>
+                    {% if document.original_url %}
+                    <p><strong>URL Original:</strong> <a href="{{ document.original_url }}" target="_blank">{{ document.original_url }}</a></p>
+                    {% endif %}
+                    <p><strong>Status:</strong> 
+                        {% if document.processing_status == 'PENDING' %}
+                        <span class="badge bg-warning text-dark">Pendente</span>
+                        {% elif document.processing_status == 'PROCESSING' %}
+                        <span class="badge bg-info">Processando</span>
+                        {% elif document.processing_status == 'PROCESSED' %}
+                        <span class="badge bg-success">Processado</span>
+                        {% elif document.processing_status == 'FAILED' %}
+                        <span class="badge bg-danger">Falhou</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ document.processing_status }}</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Data de Adição:</strong> {{ document.created_at|date:"d/m/Y H:i" }}</p>
+                    
+                    {% if document.tags.all %}
+                    <p><strong>Tags:</strong> 
+                        {% for tag in document.tags.all %}
+                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+
+                    <hr>
+
+                    <h5 class="mt-4">Conteúdo Extraído</h5>
+                    {% if document.extracted_text %}
+                    <div class="extracted-text bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;">
+                        <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ document.extracted_text }}</pre>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">O conteúdo ainda não foi extraído ou o processamento falhou.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Seção de Comentários -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Comentários ({{ comments.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'documentos:add_comment' document.pk %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ comment_form.content.label_tag }}
+                            {{ comment_form.content }}
+                            {% if comment_form.content.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ comment_form.content.errors|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Adicionar Comentário</button>
+                    </form>
+                    <hr>
+                    {% else %}
+                    <p><a href="#">Faça login</a> para adicionar um comentário.</p> <!-- TODO: Link to login -->
+                    {% endif %}
+
+                    {% for comment in comments %}
+                    <div class="comment mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>{{ comment.user.username }}</strong>
+                            <small class="text-muted">{{ comment.created_at|timesince }} atrás</small>
+                        </div>
+                        <p class="mt-1 mb-0">{{ comment.content|linebreaks }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Nenhum comentário ainda.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Ações</h5>
+                </div>
+                <div class="card-body">
+                    <a href="#" class="btn btn-outline-secondary btn-sm mb-2 w-100">Editar Documento</a> <!-- TODO: Implement edit view -->
+                    <a href="#" class="btn btn-outline-danger btn-sm w-100">Excluir Documento</a> <!-- TODO: Implement delete view -->
+                </div>
+            </div>
+            <!-- Outras informações relacionadas podem ir aqui -->
+        </div>
+    </div>
+</div>
+{% endblock %}

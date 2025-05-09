@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Consulta à Base de Conhecimento - Observatório de IA{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Consulta à Base de Conhecimento</h1>
+            <p class="lead mb-4">
+                Utilize o Graph RAG (Retrieval-Augmented Generation) para consultar a base de conhecimento do Observatório de IA.
+                O sistema utiliza um grafo de conhecimento para encontrar informações relevantes e gerar respostas contextualizadas.
+            </p>
+            
+            <div class="card mb-5">
+                <div class="card-body">
+                    <form method="post" action="{% url 'rag_integration:query' %}">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="query" class="form-label">Sua pergunta:</label>
+                            <textarea class="form-control" id="query" name="query" rows="3" placeholder="Ex: Quais são as tendências recentes em IA para educação profissional?" required>{{ query }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Consultar</button>
+                    </form>
+                </div>
+            </div>
+
+            {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+            {% endif %}
+
+            {% if response %}
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Resposta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="response-content">
+                        {{ response|linebreaks }}
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Resposta gerada com base nos documentos indexados no Observatório de IA.</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

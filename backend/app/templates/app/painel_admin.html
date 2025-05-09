@@ -1,0 +1,8 @@
+
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h1>Painel do Observatório</h1>
+  <div id="painel-container" hx-get="/admin/painel-stats/" hx-trigger="load" hx-swap="innerHTML">
+    <p>Carregando estatísticas...</p>
+  </div>
+{% endblock %}
